@@ -4,6 +4,7 @@ use home::home_dir;
 use serde::{Deserialize, Serialize};
 use std::{
     fs::{File, OpenOptions},
+    io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
 };
 
@@ -34,13 +35,15 @@ impl Config {
             home_dir
         };
 
-        let file = OpenOptions::new()
+        let mut file = OpenOptions::new()
             .read(true)
-            .append(true)
+            .write(true)
             .create(true)
             .open(config_path)?;
 
-        let config_map = serde_json::from_reader(&file).unwrap_or_default();
+        let mut data = String::new();
+        file.read_to_string(&mut data).unwrap();
+        let config_map = serde_json::from_str(&data).unwrap_or_default();
 
         Ok(Self {
             config_map,
@@ -72,6 +75,9 @@ impl Default for Config {
 
 impl Drop for Config {
     fn drop(&mut self) {
+        if let Err(error) = self.file_handle.seek(SeekFrom::Start(0)) {
+            panic!("Unable to save config: {}", error);
+        }
         if let Err(error) = serde_json::to_writer_pretty(&self.file_handle, &self.config_map) {
             panic!("Unable to save config: {}", error);
         };
