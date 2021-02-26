@@ -8,7 +8,7 @@ pub(crate) struct Sources;
 impl Sources {
     pub fn add<P: AsRef<Path>>(path: P) -> Result<()> {
         let mut config = Config::default();
-        config.add_source(path);
+        config.add_source(path)?;
 
         Ok(())
     }

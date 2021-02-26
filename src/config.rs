@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use core::panic;
 use home::home_dir;
 use serde::{Deserialize, Serialize};
@@ -51,12 +51,22 @@ impl Config {
         })
     }
 
-    pub fn add_source<P: AsRef<Path>>(&mut self, path: P) {
+    pub fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+        self.validate_source(path.as_ref())?;
         self.config_map
             .sources
             .as_mut()
             .unwrap()
             .push(path.as_ref().into());
+
+        Ok(())
+    }
+
+    fn validate_source<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        match path.as_ref().is_dir() {
+            true => Ok(()),
+            false => Err(anyhow!("Source is not a valid directory or does not exist")),
+        }
     }
 }
 
@@ -126,34 +136,41 @@ mod tests {
     #[test]
     fn it_adds_a_new_source_to_the_configuration() -> Result<()> {
         let dir = tempdir()?;
-        let fake_source_name = "path_to_fake_source";
-        let mut config = Config::load_or_create(dir.into_path())?;
+        let mut config = Config::load_or_create(dir.path().to_path_buf())?;
 
-        config.add_source(fake_source_name);
+        config.add_source(&dir)?;
 
         assert_eq!(
             config.config_map.sources.as_ref().unwrap(),
-            &vec![PathBuf::from(fake_source_name)]
+            &vec![PathBuf::from(dir.path())]
         );
 
         Ok(())
     }
 
     #[test]
+    #[should_panic(expected = "Source is not a valid directory or does not exist")]
+    fn it_errors_when_the_directory_is_invalid() {
+        let dir = tempdir().unwrap();
+        let mut config = Config::load_or_create(dir.path().to_path_buf()).unwrap();
+
+        config.add_source("invalid dir").unwrap();
+    }
+
+    #[test]
     fn it_saves_the_file_when_dropping() -> Result<()> {
         let dir = tempdir()?;
-        let fake_source_name = "path_to_fake_source";
-        let home_dir_path = dir.into_path();
+        let home_dir_path = dir.path().to_path_buf();
         let mut config = Config::load_or_create(home_dir_path.clone())?;
 
-        config.add_source(fake_source_name);
+        config.add_source(home_dir_path.clone())?;
         drop(config);
 
-        let config = Config::load_or_create(home_dir_path)?;
+        let config = Config::load_or_create(home_dir_path.clone())?;
 
         assert_eq!(
             config.config_map.sources.as_ref().unwrap(),
-            &vec![PathBuf::from(fake_source_name)]
+            &vec![home_dir_path]
         );
 
         Ok(())
