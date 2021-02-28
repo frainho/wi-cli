@@ -3,8 +3,8 @@ use core::panic;
 use home::home_dir;
 use serde::{Deserialize, Serialize};
 use std::{
-    fs::{File, OpenOptions},
-    io::{Read, Seek, SeekFrom},
+    fs::OpenOptions,
+    io::Read,
     path::{Path, PathBuf},
 };
 
@@ -23,7 +23,7 @@ impl Default for ConfigMap {
 
 pub struct Config {
     pub config_map: ConfigMap,
-    file_handle: File,
+    config_path: PathBuf,
 }
 
 impl Config {
@@ -39,7 +39,7 @@ impl Config {
             .read(true)
             .write(true)
             .create(true)
-            .open(config_path)?;
+            .open(&config_path)?;
 
         let mut data = String::new();
         file.read_to_string(&mut data).unwrap();
@@ -47,7 +47,7 @@ impl Config {
 
         Ok(Self {
             config_map,
-            file_handle: file,
+            config_path,
         })
     }
 
@@ -62,11 +62,40 @@ impl Config {
         Ok(())
     }
 
-    fn validate_source<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        match path.as_ref().is_dir() {
-            true => Ok(()),
-            false => Err(anyhow!("Source is not a valid directory or does not exist")),
+    pub fn delete_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+        let index = self
+            .config_map
+            .sources
+            .as_ref()
+            .unwrap()
+            .iter()
+            .position(|source_path| source_path == path.as_ref());
+
+        if let Some(index) = index {
+            self.config_map.sources.as_mut().unwrap().remove(index);
         }
+
+        Ok(())
+    }
+
+    fn validate_source<P: AsRef<Path>>(&self, path: P) -> Result<()> {
+        if let false = path.as_ref().is_dir() {
+            return Err(anyhow!("Source is not a valid directory or does not exist"));
+        }
+
+        let source_already_added = self
+            .config_map
+            .sources
+            .as_ref()
+            .unwrap()
+            .iter()
+            .any(|source_path| source_path == path.as_ref());
+
+        if let true = source_already_added {
+            return Err(anyhow!("Source already exists"));
+        }
+
+        Ok(())
     }
 }
 
@@ -85,18 +114,21 @@ impl Default for Config {
 
 impl Drop for Config {
     fn drop(&mut self) {
-        if let Err(error) = self.file_handle.seek(SeekFrom::Start(0)) {
+        let result = match serde_json::to_string_pretty(&self.config_map) {
+            Ok(result) => result,
+            Err(error) => panic!("Unable to parse config: {}", error),
+        };
+
+        if let Err(error) = std::fs::write(&self.config_path, &result) {
             panic!("Unable to save config: {}", error);
         }
-        if let Err(error) = serde_json::to_writer_pretty(&self.file_handle, &self.config_map) {
-            panic!("Unable to save config: {}", error);
-        };
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::{self, File};
     use std::io::Write;
     use tempfile::tempdir;
 
@@ -158,6 +190,20 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Source already exists")]
+    fn it_errors_when_the_source_already_exists() {
+        let dir = tempdir().unwrap();
+        let mut fake_source_path = dir.path().to_path_buf();
+        fake_source_path.push("fake_source");
+        fs::create_dir(&fake_source_path).unwrap();
+
+        let mut config = Config::load_or_create(dir.path().to_path_buf()).unwrap();
+
+        config.add_source(&fake_source_path).unwrap();
+        config.add_source(fake_source_path).unwrap();
+    }
+
+    #[test]
     fn it_saves_the_file_when_dropping() -> Result<()> {
         let dir = tempdir()?;
         let home_dir_path = dir.path().to_path_buf();
@@ -171,6 +217,32 @@ mod tests {
         assert_eq!(
             config.config_map.sources.as_ref().unwrap(),
             &vec![home_dir_path]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn it_removes_a_source_from_the_list() -> Result<()> {
+        let dir = tempdir()?;
+        let file_path = dir.path().join(Config::DEFAULT_CONFIG_NAME);
+        let mut file = File::create(file_path)?;
+        let fake_source_1 = "fake_source";
+        let fake_source_2 = "fake_source_2";
+        writeln!(
+            file,
+            r#"{{
+            "sources": ["{}", "{}"]
+        }}"#,
+            fake_source_1, fake_source_2
+        )?;
+        let mut config = Config::load_or_create(dir.into_path())?;
+
+        config.delete_source("fake_source")?;
+
+        assert_eq!(
+            config.config_map.sources.as_ref().unwrap(),
+            &vec![PathBuf::from(fake_source_2)]
         );
 
         Ok(())

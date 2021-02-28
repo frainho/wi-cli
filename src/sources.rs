@@ -23,4 +23,11 @@ impl Sources {
 
         Ok(())
     }
+
+    pub fn remove<P: AsRef<Path>>(path: P) -> Result<()> {
+        let mut config = Config::default();
+        config.delete_source(path)?;
+
+        Ok(())
+    }
 }

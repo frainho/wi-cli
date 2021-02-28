@@ -8,8 +8,11 @@ A cli to help you find what you're looking for
 - [x] Add a local file source
 - [x] List all sources
 - [x] Validate a local file source
+  - [x] Verify if it's a dir and exists
+  - [x] Verify if the source already exists
+  - [ ] ?
+- [x] Delete a local file source
 - [ ] Search in a local file source
-- [ ] Delete a local file source
 - [ ] Add a git source
 - [ ] Download git repo
 - [ ] Search in a local git repo

@@ -1,6 +1,6 @@
 mod cli;
-mod sources;
 mod config;
+mod sources;
 
 use anyhow::Result;
 use cli::{Command::Sources, Sources as SourcesSubcommand, Wicli};
@@ -13,6 +13,7 @@ fn main() -> Result<()> {
         Sources(sources) => match sources {
             SourcesSubcommand::Add { path } => sources::Sources::add(path)?,
             SourcesSubcommand::List => sources::Sources::list()?,
+            SourcesSubcommand::Remove { path } => sources::Sources::remove(path)?,
         },
     }
 

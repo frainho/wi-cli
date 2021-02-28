@@ -23,4 +23,8 @@ pub enum Sources {
     },
     #[structopt(about = "List all sources")]
     List,
+    Remove {
+        #[structopt(parse(from_os_str))]
+        path: PathBuf,
+    },
 }
