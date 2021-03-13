@@ -11,11 +11,13 @@ pub struct Wicli {
 #[derive(Debug, StructOpt)]
 pub enum Command {
     #[structopt(about = "Manage your file sources")]
-    Sources(Sources),
+    Sources(SourcesSubcommand),
+    #[structopt(about = "Search your sources")]
+    Search { term: String },
 }
 
 #[derive(Debug, StructOpt)]
-pub enum Sources {
+pub enum SourcesSubcommand {
     #[structopt(about = "Add a new file source")]
     Add {
         #[structopt(parse(from_os_str))]

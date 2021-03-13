@@ -6,16 +6,13 @@ use crate::config::Config;
 pub(crate) struct Sources;
 
 impl Sources {
-    pub fn add<P: AsRef<Path>>(path: P) -> Result<()> {
-        let mut config = Config::default();
+    pub fn add<P: AsRef<Path>>(config: &mut Config, path: P) -> Result<()> {
         config.add_source(path)?;
 
         Ok(())
     }
 
-    pub fn list() -> Result<()> {
-        let config = Config::default();
-
+    pub fn list(config: &Config) -> Result<()> {
         println!("List of sources");
         for source in config.config_map.sources.as_ref().unwrap().iter() {
             println!("{}", source.display());
@@ -24,8 +21,7 @@ impl Sources {
         Ok(())
     }
 
-    pub fn remove<P: AsRef<Path>>(path: P) -> Result<()> {
-        let mut config = Config::default();
+    pub fn remove<P: AsRef<Path>>(config: &mut Config, path: P) -> Result<()> {
         config.delete_source(path)?;
 
         Ok(())
