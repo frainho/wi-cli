@@ -10,13 +10,13 @@ use std::{
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfigMap {
-    pub sources: Option<Vec<PathBuf>>,
+    pub sources: Vec<PathBuf>,
 }
 
 impl Default for ConfigMap {
     fn default() -> Self {
         Self {
-            sources: Some(Vec::new()),
+            sources: Vec::new(),
         }
     }
 }
@@ -29,7 +29,7 @@ pub struct Config {
 impl Config {
     const DEFAULT_CONFIG_NAME: &'static str = "wicli.json";
 
-    fn load_or_create(mut home_dir: PathBuf) -> Result<Self> {
+    pub fn load_or_create(mut home_dir: PathBuf) -> Result<Self> {
         let config_path = {
             home_dir.push(Self::DEFAULT_CONFIG_NAME);
             home_dir
@@ -53,11 +53,7 @@ impl Config {
 
     pub fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
         self.validate_source(path.as_ref())?;
-        self.config_map
-            .sources
-            .as_mut()
-            .unwrap()
-            .push(path.as_ref().into());
+        self.config_map.sources.push(path.as_ref().into());
 
         Ok(())
     }
@@ -66,13 +62,11 @@ impl Config {
         let index = self
             .config_map
             .sources
-            .as_ref()
-            .unwrap()
             .iter()
             .position(|source_path| source_path == path.as_ref());
 
         if let Some(index) = index {
-            self.config_map.sources.as_mut().unwrap().remove(index);
+            self.config_map.sources.remove(index);
         }
 
         Ok(())
@@ -86,8 +80,6 @@ impl Config {
         let source_already_added = self
             .config_map
             .sources
-            .as_ref()
-            .unwrap()
             .iter()
             .any(|source_path| source_path == path.as_ref());
 
@@ -147,8 +139,8 @@ mod tests {
         let config = Config::load_or_create(dir.into_path())?;
 
         assert_eq!(
-            config.config_map.sources.as_ref().unwrap(),
-            &vec![PathBuf::from("fake_source")]
+            config.config_map.sources,
+            vec![PathBuf::from("fake_source")]
         );
         Ok(())
     }
@@ -158,10 +150,7 @@ mod tests {
         let dir = tempdir()?;
         let config = Config::load_or_create(dir.into_path())?;
 
-        assert_eq!(
-            config.config_map.sources.as_ref().unwrap(),
-            &Vec::<PathBuf>::new()
-        );
+        assert_eq!(config.config_map.sources, Vec::<PathBuf>::new());
         Ok(())
     }
 
@@ -172,10 +161,7 @@ mod tests {
 
         config.add_source(&dir)?;
 
-        assert_eq!(
-            config.config_map.sources.as_ref().unwrap(),
-            &vec![PathBuf::from(dir.path())]
-        );
+        assert_eq!(config.config_map.sources, vec![PathBuf::from(dir.path())]);
 
         Ok(())
     }
@@ -214,10 +200,7 @@ mod tests {
 
         let config = Config::load_or_create(home_dir_path.clone())?;
 
-        assert_eq!(
-            config.config_map.sources.as_ref().unwrap(),
-            &vec![home_dir_path]
-        );
+        assert_eq!(config.config_map.sources, vec![home_dir_path]);
 
         Ok(())
     }
@@ -241,8 +224,8 @@ mod tests {
         config.delete_source("fake_source")?;
 
         assert_eq!(
-            config.config_map.sources.as_ref().unwrap(),
-            &vec![PathBuf::from(fake_source_2)]
+            config.config_map.sources,
+            vec![PathBuf::from(fake_source_2)]
         );
 
         Ok(())

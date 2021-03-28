@@ -1,10 +1,12 @@
 mod cli;
 mod config;
+mod search;
 mod sources;
 
 use anyhow::Result;
 use cli::{Command, SourcesSubcommand, Wicli};
 use config::Config;
+use search::Search;
 use sources::Sources;
 use structopt::StructOpt;
 
@@ -19,7 +21,8 @@ fn main() -> Result<()> {
             SourcesSubcommand::Remove { path } => Sources::remove(&mut config, path)?,
         },
         Command::Search { term } => {
-            println!("{}", term)
+            let results = Search::by_term(&config, term)?;
+            println!("{}", results.len())
         }
     }
 

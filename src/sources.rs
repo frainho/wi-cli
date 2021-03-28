@@ -14,7 +14,7 @@ impl Sources {
 
     pub fn list(config: &Config) -> Result<()> {
         println!("List of sources");
-        for source in config.config_map.sources.as_ref().unwrap().iter() {
+        for source in config.config_map.sources.iter() {
             println!("{}", source.display());
         }
 
