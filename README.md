@@ -14,11 +14,19 @@ A cli tool to help you find what you're looking for
 - [x] Delete a local file source
 - [x] Search in a local file source
   - [x] Simple word search
-- [ ] Display results
-- [ ] Add a git source
-- [ ] Download git repo
-- [ ] Search in a local git repo
-- [ ] Update a git repo
+  - [ ] Check how vs code uses ripgrep?
+  - [ ] Filter non-text files/binaries, etc
+- [x] Display results
+  - [ ] Display file name in file list
+  - [ ] Highlight search matches
+  - [ ] Show area of file where highlights appear
+  - [ ] Allow navigating file
+- [ ] Git sources
+  - [ ] Add a git source
+  - [ ] Download git repo
+  - [ ] Search in a local git repo
+  - [ ] Update a git repo
 - [ ] HTTP server for shared configs
   - [ ] Save a remote sources list
   - [ ] Fetch a remote sources list
+  - [ ] Orgs and teams configs
