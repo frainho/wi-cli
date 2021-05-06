@@ -3,7 +3,8 @@ use std::path::Path;
 use anyhow::Result;
 
 use crate::config::Config;
-pub(crate) struct Sources;
+
+pub struct Sources;
 
 impl Sources {
     pub fn add<P: AsRef<Path>>(config: &mut Config, path: P) -> Result<()> {

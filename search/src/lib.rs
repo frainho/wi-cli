@@ -1,11 +1,11 @@
 use core::panic;
 use std::{fs::File, io::Read};
 
-use crate::config::Config;
 use anyhow::Result;
+use config::config::Config;
 use jwalk::{Parallelism, WalkDir};
 use rayon::prelude::*;
-pub(crate) struct Search;
+pub struct Search;
 
 impl Search {
     pub fn by_term(config: &Config, term: String) -> Result<Vec<String>> {

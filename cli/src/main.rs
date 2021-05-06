@@ -1,18 +1,15 @@
 mod cli;
-mod config;
 mod events;
 mod results_state;
-mod search;
-mod sources;
 mod ui;
 
 use anyhow::Result;
 use cli::{Command, SourcesSubcommand, Wicli};
-use config::Config;
+use config::config::Config;
+use config::sources::Sources;
 use events::Events;
 use results_state::ResultsState;
 use search::Search;
-use sources::Sources;
 use structopt::StructOpt;
 use ui::UI;
 
