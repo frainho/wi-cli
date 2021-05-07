@@ -22,10 +22,11 @@ A cli tool to help you find what you're looking for
   - [ ] Show area of file where highlights appear
   - [ ] Allow navigating file
 - [ ] Git sources
-  - [ ] Add a git source
-  - [ ] Download git repo
-  - [ ] Search in a local git repo
+  - [x] Add a git source
+  - [x] Download git repo
+  - [x] Search in a local git repo
   - [ ] Update a git repo
+  - [ ] Delete a git repo
 - [ ] HTTP server for shared configs
   - [ ] Save a remote sources list
   - [ ] Fetch a remote sources list

@@ -18,11 +18,16 @@ fn main() -> Result<()> {
     let mut config = Config::default();
 
     match opt.commands {
-        Command::Sources(sources) => match sources {
-            SourcesSubcommand::Add { path } => Sources::add(&mut config, path)?,
-            SourcesSubcommand::List => Sources::list(&config)?,
-            SourcesSubcommand::Remove { path } => Sources::remove(&mut config, path)?,
-        },
+        Command::Sources(sources) => {
+            let sources_manager = Sources::default();
+            match sources {
+                SourcesSubcommand::Add { path_or_url } => {
+                    sources_manager.add(&mut config, &path_or_url)?
+                }
+                SourcesSubcommand::List => sources_manager.list(&config)?,
+                SourcesSubcommand::Remove { path } => sources_manager.remove(&mut config, path)?,
+            };
+        }
         Command::Search { term } => {
             let results = Search::by_term(&config, term)?;
 

@@ -66,6 +66,7 @@ mod tests {
     extern crate test_utils;
     use super::*;
     use anyhow::Result;
+    use config::config::Configuration;
     use tempfile::tempdir;
     use test_utils::create_fake_source;
 

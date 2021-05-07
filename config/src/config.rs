@@ -21,14 +21,20 @@ impl Default for ConfigMap {
     }
 }
 
+pub trait Configuration {
+    const DEFAULT_CONFIG_NAME: &'static str;
+    fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()>;
+    fn delete_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()>;
+    fn get_sources(&self) -> &Vec<PathBuf>;
+}
+
+#[derive(Debug)]
 pub struct Config {
     pub config_map: ConfigMap,
     config_path: PathBuf,
 }
 
 impl Config {
-    const DEFAULT_CONFIG_NAME: &'static str = "wicli.json";
-
     pub fn load_or_create(mut home_dir: PathBuf) -> Result<Self> {
         let config_path = {
             home_dir.push(Self::DEFAULT_CONFIG_NAME);
@@ -51,27 +57,6 @@ impl Config {
         })
     }
 
-    pub fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
-        self.validate_source(path.as_ref())?;
-        self.config_map.sources.push(path.as_ref().into());
-
-        Ok(())
-    }
-
-    pub fn delete_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
-        let index = self
-            .config_map
-            .sources
-            .iter()
-            .position(|source_path| source_path == path.as_ref());
-
-        if let Some(index) = index {
-            self.config_map.sources.remove(index);
-        }
-
-        Ok(())
-    }
-
     fn validate_source<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         if let false = path.as_ref().is_dir() {
             return Err(anyhow!("Source is not a valid directory or does not exist"));
@@ -88,6 +73,35 @@ impl Config {
         }
 
         Ok(())
+    }
+}
+
+impl Configuration for Config {
+    const DEFAULT_CONFIG_NAME: &'static str = "wicli.json";
+
+    fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+        self.validate_source(path.as_ref())?;
+        self.config_map.sources.push(path.as_ref().into());
+
+        Ok(())
+    }
+
+    fn delete_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+        let index = self
+            .config_map
+            .sources
+            .iter()
+            .position(|source_path| source_path == path.as_ref());
+
+        if let Some(index) = index {
+            self.config_map.sources.remove(index);
+        }
+
+        Ok(())
+    }
+
+    fn get_sources(&self) -> &Vec<PathBuf> {
+        &self.config_map.sources
     }
 }
 

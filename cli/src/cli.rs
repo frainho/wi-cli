@@ -20,8 +20,8 @@ pub enum Command {
 pub enum SourcesSubcommand {
     #[structopt(about = "Add a new file source")]
     Add {
-        #[structopt(parse(from_os_str))]
-        path: PathBuf,
+        #[structopt(parse(from_str))]
+        path_or_url: String,
     },
     #[structopt(about = "List all sources")]
     List,
