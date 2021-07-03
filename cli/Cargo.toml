@@ -9,7 +9,8 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0.38"
 structopt = "0.3.21"
-crossterm = "0.19"
+crossterm = "0.20.0"
 tui = { version = "0.15", default-features = false, features = ['crossterm'] }
 config = { path = "../config" }
 search = { path = "../search" }
+sources = { path = "../sources" }

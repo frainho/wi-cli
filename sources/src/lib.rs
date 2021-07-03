@@ -1,21 +1,21 @@
+use anyhow::Result;
+use config::Configuration;
+use url::Url;
+
 use std::{
     path::{Path, PathBuf},
     str::FromStr,
 };
 
-use anyhow::Result;
-use url::Url;
+mod git;
 
-use crate::{
-    config::Configuration,
-    git::{DefaultGitClient, GitClient},
-};
+use crate::git::{DefaultGitClient, GitClient};
 
-pub struct Sources<GC> {
+pub struct SourceManager<GC> {
     git_client: GC,
 }
 
-impl<GC: GitClient> Sources<GC> {
+impl<GC: GitClient> SourceManager<GC> {
     pub fn add<C: Configuration>(&self, config: &mut C, path: &str) -> Result<()> {
         let source = Source::from_str(path)?;
         let path = match source.path {
@@ -43,9 +43,9 @@ impl<GC: GitClient> Sources<GC> {
     }
 }
 
-impl Default for Sources<DefaultGitClient> {
+impl Default for SourceManager<DefaultGitClient> {
     fn default() -> Self {
-        Sources {
+        SourceManager {
             git_client: DefaultGitClient,
         }
     }
@@ -79,42 +79,14 @@ impl FromStr for Source {
 
 #[cfg(test)]
 mod tests {
+    use crate::git::{MockGitClient, EXAMPLE_GIT_PATH};
+    use test_utils::MockConfiguration;
+
     use super::*;
-    const EXAMPLE_GIT_PATH: &str = "anything.git";
-
-    struct MockGitClient;
-
-    impl GitClient for MockGitClient {
-        fn clone(&self, _url: Url) -> PathBuf {
-            PathBuf::from(EXAMPLE_GIT_PATH)
-        }
-    }
-
-    #[derive(Debug)]
-    struct MockConfiguration {
-        source_added: Option<PathBuf>,
-    }
-
-    impl Configuration for MockConfiguration {
-        fn add_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
-            self.source_added = Some(path.as_ref().to_path_buf());
-            Ok(())
-        }
-
-        fn delete_source<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
-            todo!()
-        }
-
-        fn get_sources(&self) -> &Vec<PathBuf> {
-            todo!()
-        }
-
-        const DEFAULT_CONFIG_NAME: &'static str = "hello";
-    }
 
     #[test]
     fn it_adds_git_sources() {
-        let sources = Sources {
+        let sources = SourceManager {
             git_client: MockGitClient,
         };
         let mut config = MockConfiguration { source_added: None };
@@ -127,7 +99,7 @@ mod tests {
 
     #[test]
     fn it_adds_a_new_local_source() {
-        let sources = Sources {
+        let sources = SourceManager {
             git_client: MockGitClient,
         };
         let mut config = MockConfiguration { source_added: None };

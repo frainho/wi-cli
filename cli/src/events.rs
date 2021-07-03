@@ -50,7 +50,7 @@ mod tests {
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, false);
+        assert!(!exit_app);
         assert_eq!(results_state.list_state.selected(), Some(0));
     }
 
@@ -62,7 +62,7 @@ mod tests {
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, false);
+        assert!(!exit_app);
         assert_eq!(results_state.list_state.selected(), Some(0));
     }
 
@@ -74,14 +74,14 @@ mod tests {
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, false);
+        assert!(!exit_app);
         assert_eq!(results_state.list_state.selected(), None);
 
         let key_event = KeyEvent::new(KeyCode::Char('A'), KeyModifiers::NONE);
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, false);
+        assert!(!exit_app);
         assert_eq!(results_state.list_state.selected(), None);
     }
 
@@ -93,7 +93,7 @@ mod tests {
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, true);
+        assert!(exit_app);
     }
 
     #[test]
@@ -104,6 +104,6 @@ mod tests {
 
         let exit_app = Events::handle_event(key_event, &mut results_state);
 
-        assert_eq!(exit_app, true);
+        assert!(exit_app);
     }
 }

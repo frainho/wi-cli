@@ -40,3 +40,12 @@ impl DefaultGitClient {
         path
     }
 }
+
+pub struct MockGitClient;
+pub const EXAMPLE_GIT_PATH: &str = "anything.git";
+
+impl GitClient for MockGitClient {
+    fn clone(&self, _url: Url) -> PathBuf {
+        PathBuf::from(EXAMPLE_GIT_PATH)
+    }
+}

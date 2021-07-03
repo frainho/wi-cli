@@ -5,11 +5,11 @@ mod ui;
 
 use anyhow::Result;
 use cli::{Command, SourcesSubcommand, Wicli};
-use config::config::Config;
-use config::sources::Sources;
+use config::Config;
 use events::Events;
 use results_state::ResultsState;
 use search::Search;
+use sources::SourceManager;
 use structopt::StructOpt;
 use ui::UI;
 
@@ -19,7 +19,7 @@ fn main() -> Result<()> {
 
     match opt.commands {
         Command::Sources(sources) => {
-            let sources_manager = Sources::default();
+            let sources_manager = SourceManager::default();
             match sources {
                 SourcesSubcommand::Add { path_or_url } => {
                     sources_manager.add(&mut config, &path_or_url)?

@@ -2,7 +2,7 @@ use core::panic;
 use std::{fs::File, io::Read};
 
 use anyhow::Result;
-use config::config::Config;
+use config::Config;
 use jwalk::{Parallelism, WalkDir};
 use rayon::prelude::*;
 pub struct Search;
@@ -66,7 +66,7 @@ mod tests {
     extern crate test_utils;
     use super::*;
     use anyhow::Result;
-    use config::config::Configuration;
+    use config::Configuration;
     use tempfile::tempdir;
     use test_utils::create_fake_source;
 

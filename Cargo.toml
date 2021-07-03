@@ -3,5 +3,6 @@ members = [
     "cli",
     "config",
     "search",
+    "sources",
     "test_utils"
 ]
